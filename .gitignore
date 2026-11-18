@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+apps/web/build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Generated data & model weights
+data/uploads/*
+!data/uploads/.gitkeep
+data/outputs/*
+!data/outputs/.gitkeep
+models/*
+!models/.gitkeep
+
+# Logs & OS
+*.log
+.DS_Store
