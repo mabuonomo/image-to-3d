@@ -7,7 +7,10 @@ services:
     ports:
       - "${WORKER_PORT:-8000}:8000"
     environment:
-      - PIPELINE_MODE=${PIPELINE_MODE:-demo}
+      - HUNYUAN_MODEL_ID=${HUNYUAN_MODEL_ID:-tencent/Hunyuan3D-2mini}
+      - HUNYUAN_SUBFOLDER=${HUNYUAN_SUBFOLDER:-hunyuan3d-dit-v2-mini}
+      - ENABLE_TEXTURE=${ENABLE_TEXTURE:-true}
+      - HF_HOME=${HF_HOME:-/models/huggingface}
       - HF_TOKEN=${HF_TOKEN:-}
       - DATA_DIR=/data
       - MODELS_DIR=/models

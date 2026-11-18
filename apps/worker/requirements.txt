@@ -8,3 +8,4 @@ trimesh>=4.5.0
 pygltflib>=1.16.2
 rembg>=2.0.59
 onnxruntime-gpu>=1.19.2
+huggingface_hub>=0.26.0

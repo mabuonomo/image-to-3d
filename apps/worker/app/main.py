@@ -19,7 +19,7 @@ from app.pipeline.preprocess import preprocess_image
 DATA_DIR = Path(os.getenv("DATA_DIR", "/data"))
 UPLOADS_DIR = DATA_DIR / "uploads"
 OUTPUTS_DIR = DATA_DIR / "outputs"
-PIPELINE_MODE = os.getenv("PIPELINE_MODE", "demo")
+DEFAULT_ENABLE_TEXTURE = os.getenv("ENABLE_TEXTURE", "true").lower() == "true"
 
 
 class JobRecord(BaseModel):
@@ -27,8 +27,8 @@ class JobRecord(BaseModel):
     status: Literal["queued", "preprocessing", "generating_mesh", "rigging", "completed", "failed"]
     progress: int
     step: str
-    mode: str
     remove_bg: bool
+    enable_texture: bool
     auto_rig: bool
     output_url: str | None = None
     error: str | None = None
@@ -48,24 +48,24 @@ async def _process_job(job_id: str) -> None:
 
     try:
         job.status = "preprocessing"
-        job.progress = 20
+        job.progress = 15
         job.step = "Rimozione sfondo e normalizzazione immagine..."
         await asyncio.to_thread(
             preprocess_image, input_path, pre_path, job.remove_bg
         )
 
         job.status = "generating_mesh"
-        job.progress = 55
-        job.step = "Generazione mesh 3D..."
+        job.progress = 50
+        job.step = "Generazione mesh 3D con Hunyuan3D-2..."
         await asyncio.to_thread(
-            generate_static_mesh, pre_path, static_mesh_path, job.mode
+            generate_static_mesh, pre_path, static_mesh_path, job.enable_texture
         )
 
         job.status = "rigging"
-        job.progress = 85
-        job.step = "Auto-rigging scheletro e skinning..."
+        job.progress = 80
+        job.step = "Auto-rigging scheletro e skinning con UniRig + Blender..."
         result_path = await asyncio.to_thread(
-            rig_mesh, static_mesh_path, final_mesh_path, job.auto_rig, job.mode
+            rig_mesh, static_mesh_path, final_mesh_path, job.auto_rig
         )
 
         job.status = "completed"
@@ -99,7 +99,7 @@ async def lifespan(_: FastAPI):
     task.cancel()
 
 
-app = FastAPI(title="Image-to-3D GPU Worker", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Image-to-3D GPU Worker", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -114,7 +114,7 @@ app.add_middleware(
 def health():
     return {
         "status": "ok",
-        "pipeline_mode": PIPELINE_MODE,
+        "model": os.getenv("HUNYUAN_MODEL_ID", "tencent/Hunyuan3D-2mini"),
         "gpu": check_gpu(),
     }
 
@@ -123,6 +123,7 @@ def health():
 async def create_job(
     file: UploadFile = File(...),
     remove_bg: bool = Form(True),
+    enable_texture: bool = Form(DEFAULT_ENABLE_TEXTURE),
     auto_rig: bool = Form(True),
 ):
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -138,8 +139,8 @@ async def create_job(
         status="queued",
         progress=5,
         step="In coda per la GPU...",
-        mode=PIPELINE_MODE,
         remove_bg=remove_bg,
+        enable_texture=enable_texture,
         auto_rig=auto_rig,
         created_at=time.time(),
     )

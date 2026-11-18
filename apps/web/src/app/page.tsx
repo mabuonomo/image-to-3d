@@ -14,7 +14,7 @@ interface GpuDevice {
 
 interface HealthResponse {
   status: string;
-  pipeline_mode: string;
+  model: string;
   gpu: {
     cuda_available: boolean;
     cuda_version: string | null;
@@ -36,6 +36,7 @@ export default function HomePage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [removeBg, setRemoveBg] = useState(true);
+  const [enableTexture, setEnableTexture] = useState(true);
   const [autoRig, setAutoRig] = useState(true);
   const [job, setJob] = useState<JobResponse | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -82,6 +83,7 @@ export default function HomePage() {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("remove_bg", String(removeBg));
+      formData.append("enable_texture", String(enableTexture));
       formData.append("auto_rig", String(autoRig));
 
       const res = await fetch(`${WORKER_URL}/jobs`, {
@@ -130,7 +132,7 @@ export default function HomePage() {
               {gpuDevice
                 ? `${gpuDevice.name} (${gpuDevice.vram_gb} GB) • CUDA ${health.gpu.cuda_version}`
                 : "Worker attivo (CPU fallback)"}{" "}
-              • Modalità: <strong>{health.pipeline_mode}</strong>
+              • <strong>{health.model}</strong>
             </span>
           ) : (
             <span className="text-zinc-500">Worker non raggiungibile</span>
@@ -175,6 +177,16 @@ export default function HomePage() {
                   className="rounded border-zinc-700 bg-zinc-800"
                 />
                 Rimuovi sfondo automaticamente
+              </label>
+
+              <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableTexture}
+                  onChange={(e) => setEnableTexture(e.target.checked)}
+                  className="rounded border-zinc-700 bg-zinc-800"
+                />
+                Genera Texture PBR
               </label>
 
               <label className="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer">
