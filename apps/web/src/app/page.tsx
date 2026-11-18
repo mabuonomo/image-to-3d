@@ -114,7 +114,7 @@ export default function HomePage() {
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Image-to-3D Rigging Studio
+            Image-to-3D
           </h1>
           <p className="text-sm text-zinc-400">
             Genera modelli <code>.glb</code> con scheletro per animazioni e video

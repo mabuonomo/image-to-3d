@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Image-to-3D Studio",
+  title: "Image-to-3D",
   description: "Genera modelli .glb con scheletro da immagini su GPU locale",
 };
 
